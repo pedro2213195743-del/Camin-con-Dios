@@ -1,0 +1,38 @@
+name: Compilar APK Independiente (Camino con Dios)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Incrustar Biblia completa (66 libros, 31,102 versículos) para uso 100% offline
+        run: |
+          curl -fsSL https://cdn.jsdelivr.net/gh/thiagobodruk/bible@master/json/es_rvr1960.json -o app/src/main/assets/www/bible_es.json
+          ls -lh app/src/main/assets/www/bible_es.json
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9
+
+      - name: Compilar APK independiente
+        run: gradle assembleRelease --no-daemon
+
+      - name: Publicar APK descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: CaminoConDios-APK-Offline
+          path: app/build/outputs/apk/release/*.apk
