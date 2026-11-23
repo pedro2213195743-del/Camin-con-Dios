@@ -1,0 +1,24 @@
+name: Build APK
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 10camino_con_dios_android
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL https://cdn.jsdelivr.net/gh/thiagobodruk/bible@master/json/es_rvr1960.json -o app/src/main/assets/www/bible_es.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9
+      - run: gradle assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CaminoConDios-APK-Offline
+          path: 10camino_con_dios_android/app/build/outputs/apk/release/*.apk
+
